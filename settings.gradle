@@ -1,7 +1,6 @@
-rootProject.name = 'root-finance-platform'
-
+rootProject.name = 'cloud_native'
 include 'user-service'
 include 'transaction-service'
-include 'notification-service'
 include 'analytics-service'
+include 'notification-service'
 include 'api-gateway'
