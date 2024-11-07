@@ -149,7 +149,7 @@ Transaction Service
 - 예산 대비 지출 분석
 - 지출 패턴 분석
 ```
-### analytics-service/
+analytics-service/
 ├── src/main/java/com/finance/analytics/
 │   ├── controller/
 │   │   ├── BudgetAnalysisController.java
