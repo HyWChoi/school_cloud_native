@@ -1,7 +1,5 @@
 rootProject.name = 'cloud_native'
 
-include 'analytics-service'
 include 'api-gateway'
-include 'notification-service'
 include 'transaction-service'
 include 'user-service'
