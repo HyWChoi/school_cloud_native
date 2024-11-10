@@ -5,16 +5,18 @@ import com.finance.transaction_service.domain.category.dto.CategoryListResponse;
 import com.finance.transaction_service.domain.category.dto.CategoryResponse;
 import com.finance.transaction_service.domain.category.dto.CategoryUpdateRequest;
 import com.finance.transaction_service.domain.category.entity.Category;
+import com.finance.transaction_service.domain.category.repository.CategoryRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class CategoryService {
     private final CategoryRepository categoryRepository;
 
@@ -38,7 +40,8 @@ public class CategoryService {
         Category category = categoryRepository.findByIdAndProfileId(categoryId, profileId)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found"));
 
-        category.updateContent(request.getContent());
+        category.setContent(request.getContent());
+        categoryRepository.save(category);
         return CategoryResponse.from(category);
     }
 
@@ -46,7 +49,7 @@ public class CategoryService {
     public void deleteCategory(Long profileId, Long categoryId) {
         Category category = categoryRepository.findByIdAndProfileId(categoryId, profileId)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found"));
-
-        category.softDelete();
+        category.setDeletedAt(LocalDateTime.now());
+        categoryRepository.save(category);
     }
 }
