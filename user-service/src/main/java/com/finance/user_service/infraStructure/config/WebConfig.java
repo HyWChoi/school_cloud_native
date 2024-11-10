@@ -17,12 +17,13 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new SessionInterceptor(redisTemplate))
                 .excludePathPatterns(
-                        "/api/user_service/register",
-                        "/api/user_service/login",
+                        "/user_service/profile/login",
+                        "/user_service/profile/register",
                         "/swagger-ui/**",
                         "/swagger-ui.html",
                         "/v3/api-docs/**",
-                        "/swagger-resources/**"
+                        "/swagger-resources/**",
+                        "/"
                 );
     }
 }

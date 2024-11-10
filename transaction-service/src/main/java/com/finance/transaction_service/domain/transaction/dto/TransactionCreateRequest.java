@@ -13,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransactionCreateRequest {
-    private Long profileId;
     private String transactionType;
     private Long amount;
     private String description;

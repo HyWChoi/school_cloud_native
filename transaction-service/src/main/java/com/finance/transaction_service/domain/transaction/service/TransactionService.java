@@ -1,5 +1,6 @@
 package com.finance.transaction_service.domain.transaction.service;
 
+import com.finance.transaction_service.domain.SessionProfile;
 import com.finance.transaction_service.domain.category.dto.CategoryResponse;
 import com.finance.transaction_service.domain.category.entity.Category;
 import com.finance.transaction_service.domain.category.repository.CategoryRepository;
@@ -12,6 +13,7 @@ import com.finance.transaction_service.domain.transaction.entity.TransactionCate
 import com.finance.transaction_service.domain.transaction.repository.TransactionCategoryRepository;
 import com.finance.transaction_service.domain.transaction.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,11 +27,13 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final TransactionCategoryRepository transactionCategoryRepository;
     private final CategoryRepository categoryRepository;
+    private final RedisTemplate<String, SessionProfile> redisTemplate;
 
     @Transactional
-    public TransactionResponse createTransaction(TransactionCreateRequest request) {
+    public TransactionResponse createTransaction(Long profileId, TransactionCreateRequest request) {
+
         Transaction transaction = Transaction.builder()
-                .profileId(request.getProfileId())
+                .profileId(profileId)
                 .transactionType(request.getTransactionType())
                 .amount(request.getAmount())
                 .description(request.getDescription())
