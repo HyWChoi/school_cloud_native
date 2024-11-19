@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Button,
   Modal,
@@ -16,43 +16,94 @@ import {
   useDisclosure
 } from '@chakra-ui/react';
 
-const TransactionModal = ({ categories }) => {
+const TransactionModal = ({ 
+  isEdit = false, 
+  transaction = null, 
+  categories
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const initialRef = React.useRef();
-  const finalRef = React.useRef();
+  const [formData, setFormData] = React.useState({
+    type: 'expense',
+    category: '',
+    description: '',
+    amount: '',
+    date: new Date().toISOString().split('T')[0],
+  });
+
+  useEffect(() => {
+    if (isEdit && transaction) {
+      setFormData({
+        type: transaction.type || 'expense',
+        category: transaction.category || '',
+        description: transaction.description || '',
+        amount: transaction.amount?.toString() || '',
+        date: transaction.date || new Date().toISOString().split('T')[0],
+      });
+    }
+  }, [isEdit, transaction]);
+
+  const handleSubmit = () => {
+    if (isEdit) {
+      console.log('Updating transaction:', { ...formData, id: transaction.id });
+    } else {
+      console.log('Creating new transaction:', formData);
+    }
+    onClose();
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   return (
     <>
-      <Button width="100%" onClick={onOpen}>
-        [ 입금 / 출금 ] 기록 추가
-      </Button>
+      {isEdit ? (
+        <Button size="sm" onClick={onOpen}>수정</Button>
+      ) : (
+        <Button width="100%" onClick={onOpen}>
+          [ 입금 / 출금 ] 기록 추가
+        </Button>
+      )}
 
       <Modal
         initialFocusRef={initialRef}
-        finalFocusRef={finalRef}
         isOpen={isOpen}
         onClose={onClose}
         size="lg"
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>[ 입금 / 출금 ] 추가</ModalHeader>
+          <ModalHeader>
+            {isEdit ? '거래 내역 수정' : '[ 입금 / 출금 ] 추가'}
+          </ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
             <VStack spacing={4}>
-              {/* 거래 타입 선택 */}
               <FormControl isRequired>
                 <FormLabel>거래 타입</FormLabel>
-                <Select placeholder="거래 타입을 선택하세요">
+                <Select
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                >
                   <option value="income">입금</option>
                   <option value="expense">출금</option>
                 </Select>
               </FormControl>
 
-              {/* 카테고리 선택 */}
               <FormControl isRequired>
                 <FormLabel>카테고리</FormLabel>
-                <Select placeholder="카테고리를 선택하세요">
+                <Select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                >
+                  <option value="">카테고리를 선택하세요</option>
                   {categories?.map((category) => (
                     <option key={category.name} value={category.name}>
                       {category.name}
@@ -61,39 +112,44 @@ const TransactionModal = ({ categories }) => {
                 </Select>
               </FormControl>
 
-              {/* 내용 입력 */}
               <FormControl isRequired>
                 <FormLabel>내용</FormLabel>
-                <Input 
+                <Input
+                  name="description"
                   ref={initialRef}
+                  value={formData.description}
+                  onChange={handleChange}
                   placeholder="예: 맛있는 짜장면, 친구와 만남 등"
                 />
               </FormControl>
 
-              {/* 금액 입력 */}
               <FormControl isRequired>
                 <FormLabel>금액</FormLabel>
-                <Input 
+                <Input
+                  name="amount"
                   type="number"
+                  value={formData.amount}
+                  onChange={handleChange}
                   placeholder="금액을 입력하세요"
                   min="0"
                 />
               </FormControl>
 
-              {/* 날짜 선택 */}
               <FormControl isRequired>
                 <FormLabel>날짜</FormLabel>
                 <Input
+                  name="date"
                   type="date"
-                  defaultValue={new Date().toISOString().split('T')[0]}
+                  value={formData.date}
+                  onChange={handleChange}
                 />
               </FormControl>
             </VStack>
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="blue" mr={3}>
-              저장
+            <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
+              {isEdit ? '수정' : '저장'}
             </Button>
             <Button onClick={onClose}>취소</Button>
           </ModalFooter>
@@ -101,6 +157,6 @@ const TransactionModal = ({ categories }) => {
       </Modal>
     </>
   );
-}
+};
 
 export default TransactionModal;

@@ -15,6 +15,9 @@ const TransactionItem = ({ transaction, categories }) => {
           isEdit={true}
           transaction={transaction}
           categories={categories}
+          triggerButton={
+            <Button size="sm">수정</Button>
+          }
         />
       </Td>
       <Td>

@@ -15,6 +15,7 @@ import {
   Divider
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import RegisterModal from './RegisterModal';
 
 const LoginBox = () => {
   const [email, setEmail] = React.useState('');
@@ -40,10 +41,27 @@ const LoginBox = () => {
 
     setIsLoading(true);
     try {
-      // 여기에 실제 로그인 로직 구현
-      // const response = await loginUser(email, password);
-      console.log('로그인 시도:', { email, password });
+      // API 호출
+      const response = await fetch('/user_service/profile/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error(response.status === 401 
+          ? '이메일 또는 비밀번호가 올바르지 않습니다.'
+          : '로그인 중 오류가 발생했습니다.'
+        );
+      }
+
+      const data = await response.json();
       
+      // 세션 ID를 로컬 스토리지에 저장
+      localStorage.setItem('sessionId', data.sessionId);
+
       toast({
         title: '로그인 성공',
         description: '환영합니다!',
@@ -51,10 +69,14 @@ const LoginBox = () => {
         duration: 3000,
         isClosable: true,
       });
+
+      // TODO: 로그인 성공 후 리다이렉션 또는 상태 업데이트
+      // window.location.href = '/dashboard'; // 또는 React Router 사용
+      
     } catch (error) {
       toast({
         title: '로그인 실패',
-        description: error.message || '로그인에 실패했습니다. 다시 시도해주세요.',
+        description: error.message,
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -66,6 +88,17 @@ const LoginBox = () => {
 
   const handleTogglePassword = () => {
     setShowPassword(!showPassword);
+  };
+
+  // 이메일 유효성 검사
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  // 비밀번호 유효성 검사 (최소 6자 이상)
+  const validatePassword = (password) => {
+    return password.length >= 6;
   };
 
   return (
@@ -82,6 +115,7 @@ const LoginBox = () => {
                 placeholder="example@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                isInvalid={email && !validateEmail(email)}
               />
             </FormControl>
 
@@ -93,6 +127,7 @@ const LoginBox = () => {
                   placeholder="비밀번호를 입력하세요"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  isInvalid={password && !validatePassword(password)}
                 />
                 <InputRightElement>
                   <IconButton
@@ -103,6 +138,11 @@ const LoginBox = () => {
                   />
                 </InputRightElement>
               </InputGroup>
+              {password && !validatePassword(password) && (
+                <Text color="red.500" fontSize="sm" mt={1}>
+                  비밀번호는 최소 6자 이상이어야 합니다.
+                </Text>
+              )}
             </FormControl>
 
             <Button
@@ -111,6 +151,7 @@ const LoginBox = () => {
               width="100%"
               isLoading={isLoading}
               loadingText="로그인 중..."
+              isDisabled={!validateEmail(email) || !validatePassword(password)}
             >
               로그인
             </Button>
@@ -123,13 +164,7 @@ const LoginBox = () => {
           <Text fontSize="sm" color="gray.600">
             아직 계정이 없으신가요?
           </Text>
-          <Button
-            variant="outline"
-            width="100%"
-            colorScheme="blue"
-          >
-            회원가입
-          </Button>
+          <RegisterModal />
         </VStack>
 
         <Button
